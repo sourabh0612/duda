@@ -211,12 +211,12 @@ int _mkp_event_read(int sockfd)
 
 int _mkp_event_write(int sockfd)
 {
-    struct duda_event_handler *eh = duda_event_lookup(sockfd);
+	struct duda_event_handler *eh = duda_event_lookup(sockfd);
+	
     if (eh && eh->cb_on_write) {
         eh->cb_on_write(eh->sockfd, eh->dr);
         return MK_PLUGIN_RET_EVENT_OWNED;
     }
-
     /*
      * By default we always check if we have some pending data in our
      * outgoing queue
@@ -268,7 +268,7 @@ void _mkp_core_prctx(struct server_config *config)
 void _mkp_core_thctx()
 {
     struct mk_list *head_vs, *head_ws, *head_gl;
-    struct mk_list *list_events_write;
+    struct mk_list *list_events_write, *list_events_package;
     struct vhost_services *entry_vs;
     struct web_service *entry_ws;
     duda_global_t *entry_gl;
@@ -280,6 +280,11 @@ void _mkp_core_thctx()
     list_events_write = mk_api->mem_alloc(sizeof(struct mk_list));
     mk_list_init(list_events_write);
     pthread_setspecific(duda_global_events_write, (void *) list_events_write);
+    
+    list_events_package = mk_api->mem_alloc(sizeof(struct mk_list));
+    mk_list_init(list_events_package);
+    pthread_setspecific(duda_events_list, (void *) list_events_package);
+    
 
     /*
      * Load global data if applies, this is toooo recursive, we need to go through
